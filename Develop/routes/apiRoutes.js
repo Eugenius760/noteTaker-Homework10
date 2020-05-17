@@ -5,30 +5,16 @@ var fs = require("fs");
 module.exports = function(app) {
 
     app.get("/api/notes", function(req, res) {
-        res.json(notesArray);
+        res.sendFile(path.join(__dirname, "../db/db.json"));
     });
 
     app.post("/api/notes", function(req, res) {
         var newNote = req.body;
         notesArray.push(newNote);
 
-        noteID(notesArray);
-
-        fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(notesArray), (err) => {
-            if (err) {
-                console.log("Note not updated");
-            } else {
-                console.log("Note taken!");
-            }
-        })
-        res.json(newNote);
+        write(notesArray);
+        res.json(notesArray);
     });
-
-    var noteID = function(arr) {
-        for (i = 0; i < arr.length; i++) {
-            arr[i].id = i + 1;
-        }
-    }
 
     app.delete("/api/notes/:id", function(req, res) {
 
@@ -38,15 +24,21 @@ module.exports = function(app) {
                     notesArray.splice(i, 1);
                 }
             }
-        noteID(notesArray);
+        write(notesArray);
+        res.json(notesArray);
+    });
+}
 
-        fs.writeFile(path.join(__dirname, "../db/db.json"), JSON.stringify(notesArray), (err) => {
-            if (err) {
-                console.log("Note not updated")
-            } else {
-                console.log("Note taken!")
-            }
-        })
-        res.json(theNote);
+function noteID(newNote) {
+    for (i = 0; i < newNote.length; i++) {
+        newNote[i].id = i + 1;
+    }
+}
+
+function write(notesArray) {
+    noteID(notesArray);
+    fs.writeFile("./db/db.json", JSON.stringify(notesArray), function(err) {
+        if (err) throw err;
+        console.log("Note Taken!")
     })
 }
