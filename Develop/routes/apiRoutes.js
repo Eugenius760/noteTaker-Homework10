@@ -1,6 +1,6 @@
-var db = require("../db/db.json");
+var notesArray = require("../db/db.json");
 var path = require("path");
-var fs = require("fs")
+var fs = require("fs");
 
 module.exports = function(app) {
 
