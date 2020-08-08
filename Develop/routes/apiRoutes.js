@@ -2,43 +2,57 @@ var notesArray = require("../db/db.json");
 var path = require("path");
 var fs = require("fs");
 
-module.exports = function(app) {
+module.exports = function (app) {
+  app.get("/api/notes", function (req, res) {
+    res.json(notesArray);
+  });
 
-    app.get("/api/notes", function(req, res) {
-        res.sendFile(path.join(__dirname, "../db/db.json"));
-    });
+  app.post("/api/notes", function (req, res) {
+    var newNote = req.body;
+    notesArray.push(newNote);
 
-    app.post("/api/notes", function(req, res) {
-        var newNote = req.body;
-        notesArray.push(newNote);
+    uniqueID(notesArray);
 
-        write(notesArray);
-        res.json(notesArray);
-    });
+    fs.writeFile(
+      path.join(__dirname, "../db/db.json"),
+      JSON.stringify(notesArray),
+      (err) => {
+        if (err) {
+          console.log("no note fam");
+        } else {
+          console.log("note's good fam");
+        }
+      }
+    );
+    res.json(newNote);
+  });
 
-    app.delete("/api/notes/:id", function(req, res) {
-
-        var theNote = req.params.id;
-            for (i = 0; i < notesArray.length; i++) {
-                if (theNote == notesArray[i].id) {
-                    notesArray.splice(i, 1);
-                }
-            }
-        write(notesArray);
-        res.json(notesArray);
-    });
-}
-
-function noteID(newNote) {
-    for (i = 0; i < newNote.length; i++) {
-        newNote[i].id = i + 1;
+  app.delete("/api/notes/:id", function (req, res) {
+    var theNote = req.params.id;
+    for (i = 0; i < notesArray.length; i++) {
+      if (theNote == notesArray[i].id) {
+        notesArray.splice(i, 1);
+      }
     }
-}
+    uniqueID(notesArray);
 
-function write(notesArray) {
-    noteID(notesArray);
-    fs.writeFile("./db/db.json", JSON.stringify(notesArray), function(err) {
-        if (err) throw err;
-        console.log("Note Taken!")
-    })
+    fs.writeFile(
+      path.join(__dirname, "../db/db.json"),
+      JSON.stringify(notesArray),
+      (err) => {
+        if (err) {
+          console.log("no note fam");
+        } else {
+          console.log("note's good fam");
+        }
+      }
+    );
+    res.json(theNote);
+  });
+};
+
+var uniqueID = function(arr) {
+    for (i =0; i < arr.length; i++) {
+        arr[i].id = i + 1;
+    }
 }
